@@ -1,0 +1,45 @@
+name: "findflow-dependencies"
+services:
+  db:
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer:4.8.1
+    restart: unless-stopped
+    ports:
+      - 8081:8080
+    depends_on:
+      - db
+
+  elastic:
+    image: elasticsearch:8.6.2
+    restart: unless-stopped
+    environment:
+      ELASTIC_PASSWORD: example
+      xpack.security.enabled: false
+      discovery.type: single-node
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  kibana:
+    image: kibana:8.6.2
+    restart: unless-stopped
+    environment:
+      ELASTICSEARCH_HOSTS: http://elastic:9200
+      ELASTICSEARCH_USER: elastic
+      ELASTICSEARCH_PASSWORD: example
+      ELASTICSEARCH_SSL_VERIFICATIONMODE: none
+    ports:
+      - 5601:5601
+    depends_on:
+      - elastic
+
+networks:
+  flow-network:
+    name: flow

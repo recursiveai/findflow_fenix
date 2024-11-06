@@ -1,0 +1,410 @@
+api_key: my_key
+
+elastic:
+  hosts: ["http://localhost:9200"]
+  basic_auth: [elastic, example]
+  timeout: 30
+  max_retries: 3
+  retry_on_timeout: true
+  verify_certs: false
+
+sources:
+  - id: recursive
+    qa_index_id: recursive_qa_index_007
+    article_index_id: recursive_qa_index_007
+    welcome_message: 'How can I help you today?'
+    prompt_placeholder: 'How can I help?'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Recursive HR Team
+      support_center_url: https://www.notion.so/recursive/Company-Policies-765cba52acd142b59fdb60c82d152940
+      source_language: english
+      default_language: english
+
+  - id: shibuya
+    qa_index_id: shibuya_qa_index_004
+    article_index_id: shibuya_article_index_004
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Shibuya City Ward
+      support_center_url: https://www.city.shibuya.tokyo.jp
+      source_language: japanese
+      default_language: japanese
+
+  - id: line
+    qa_index_id: line_qa_index_001
+    article_index_id: line_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Line Inc.
+      support_center_url: https://help.line.me
+      source_language: japanese
+      default_language: japanese
+
+  - id: sbc
+    qa_index_id: sbc_qa_index_001
+    article_index_id: sbc_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Shunan Beauty Clinic
+      support_center_url: https://www.s-b-c.net/qa
+      source_language: japanese
+      default_language: japanese
+
+  - id: cainz
+    qa_index_id: sbc_qa_index_001
+    article_index_id: sbc_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Cainz Inc.
+      support_center_url: https://www.s-b-c.net/qa
+      source_language: japanese
+      default_language: japanese
+
+  - id: uniqlo
+    qa_index_id: uniqlo_qa_index_001
+    article_index_id: uniqlo_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: UNIQLO Inc.
+      support_center_url: https://faq.uniqlo.com
+      source_language: japanese
+      default_language: japanese
+
+  - id: maruha_nichiro
+    qa_index_id: maruha_nichiro_qa_index_001
+    article_index_id: maruha_nichiro_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Maruha Nichiro Inc.
+      support_center_url: https://www.maruha-nichiro.co.jp/inquiry/
+      source_language: japanese
+      default_language: japanese
+
+  - id: rakuten
+    qa_index_id: rakuten_qa_index_001
+    article_index_id: rakuten_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Rakuten Inc.
+      support_center_url: https://infoseek.faq.rakuten.net
+      source_language: japanese
+      default_language: japanese
+
+  - id: gu
+    qa_index_id: gu_qa_index_001
+    article_index_id: gu_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: G.U. CO., Ltd.
+      support_center_url: https://faq.gu-global.com/
+      source_language: japanese
+      default_language: japanese
+
+  - id: yamato
+    qa_index_id: yamato_qa_index_001
+    article_index_id: yamato_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Yamato Transport Co., Ltd.
+      support_center_url: https://faq.kuronekoyamato.co.jp/
+      source_language: japanese
+      default_language: japanese
+
+  - id: kao
+    qa_index_id: kao_qa_index_001
+    article_index_id: kao_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Kao Corporation
+      support_center_url: https://www.kao.com/jp/qa/
+      source_language: japanese
+      default_language: japanese
+
+  - id: au
+    qa_index_id: au_qa_index_001
+    article_index_id: au_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: au by KDDI Corporation
+      support_center_url: https://www.au.com/support_1/
+      source_language: japanese
+      default_language: japanese
+
+  - id: donki
+    qa_index_id: donki_qa_index_001
+    article_index_id: donki_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: donki by PPIH Corporation
+      support_center_url: https://qa.ppih.co.jp/?site_domain=donki
+      source_language: japanese
+      default_language: japanese
+
+  - id: idaten
+    qa_index_id: idaten_qa_index_001
+    article_index_id: idaten_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: iDATEN by DAIWABO INFORMATION SYSTEM CO.,LTD.
+      support_center_url: https://www.idaten.ne.jp/portal/page/out/km/help/firstguide_FAQ.html
+      source_language: japanese
+      default_language: japanese
+
+  - id: iodata
+    qa_index_id: iodata_qa_index_001
+    article_index_id: iodata_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: I-O DATA DEVICE, INC.
+      support_center_url: https://www.iodata.jp/support/after/tel/
+      source_language: japanese
+      default_language: japanese
+
+  - id: cosmos
+    qa_index_id: cosmos_qa_index_001
+    article_index_id: cosmos_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: COSMOS Pharmaceutical Corporation
+      support_center_url: https://www.cosmospc.co.jp/faq.html
+      source_language: japanese
+      default_language: japanese
+
+  - id: elecom
+    qa_index_id: elecom_qa_index_001
+    article_index_id: elecom_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: ELECOM CO.,LTD.
+      support_center_url: https://qa.elecom.co.jp/
+      source_language: japanese
+      default_language: japanese
+
+  - id: matsukiyo
+    qa_index_id: matsukiyo_qa_index_001
+    article_index_id: matsukiyo_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Matsumotokiyoshi Group Co., Ltd.
+      support_center_url: https://faq.matsukiyococokara-online.com/kb/ja
+      source_language: japanese
+      default_language: japanese
+
+  - id: shimamura
+    qa_index_id: shimamura_qa_index_001
+    article_index_id: shimamura_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: SHIMAMURA Co., Ltd.
+      support_center_url: https://www.shop-shimamura.com/html/faq.html
+      source_language: japanese
+      default_language: japanese
+
+  - id: muji
+    qa_index_id: muji_qa_index_001
+    article_index_id: muji_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: MUJI by Ryohin Keikaku Co., Ltd.
+      support_center_url: https://faq.muji.com/
+      source_language: japanese
+      default_language: japanese
+
+  - id: banpu
+    qa_index_id: banpu_qa_index_001
+    article_index_id: banpu_article_index_001
+    welcome_message: 'How can I help you today?'
+    prompt_placeholder: 'How can I help?'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Banpu Public Company Limited
+      support_center_url: https://www.banpu.com/banpu-people/human-resources-management-policy/
+      source_language: english
+      default_language: english
+
+  - id: sanrio
+    qa_index_id: sanrio_qa_index_001
+    article_index_id: sanrio_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: SANRIO CO., LTD.
+      support_center_url: https://contact.sanrio.co.jp/hc/ja
+      source_language: japanese
+      default_language: japanese
+
+  - id: pokemon
+    qa_index_id: pokemon_qa_index_001
+    article_index_id: pokemon_article_index_001
+    welcome_message: 'How can I help you today?'
+    prompt_placeholder: 'How can I help?'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Pokémon
+      support_center_url: https://support.pokemoncenter.com/hc/en-us
+      source_language: english
+      default_language: english
+
+  - id: yodobashi
+    qa_index_id: yodobashi_qa_index_001
+    article_index_id: yodobashi_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Yodobashi Camera Co.,Ltd.
+      support_center_url: https://www.yodobashi.com/ec/support/faq/index.html
+      source_language: japanese
+      default_language: japanese
+
+  - id: kirin
+    qa_index_id: kirin_qa_index_001
+    article_index_id: kirin_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Kirin Holdings Co.,Ltd.
+      support_center_url: https://faq.kirin.co.jp/
+      source_language: japanese
+      default_language: japanese
+
+  - id: asahi
+    qa_index_id: asahi_qa_index_001
+    article_index_id: asahi_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: Asahi Group Foods, Ltd.
+      support_center_url: https://asahi-gf-faq.dga.jp/index.html
+      source_language: japanese
+      default_language: japanese
+
+  - id: mistore
+    qa_index_id: mistore_qa_index_001
+    article_index_id: mistore_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: ISETAN MITSUKOSHI
+      support_center_url: https://faq.mistore.jp/
+      source_language: japanese
+      default_language: japanese
+
+  - id: joshin
+    qa_index_id: joshin_qa_index_001
+    article_index_id: joshin_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: 上新電機株式会社
+      support_center_url: https://faq.joshinweb.jp/index.html
+      source_language: japanese
+      default_language: japanese
+
+  - id: sega
+    qa_index_id: sega_qa_index_001
+    article_index_id: sega_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: SEGA CORPORATION
+      support_center_url: https://faq.sega.jp/hc/ja
+      source_language: japanese
+      default_language: japanese
+
+  - id: nintendo
+    qa_index_id: nintendo_qa_index_001
+    article_index_id: nintendo_article_index_001
+    welcome_message: '渋谷へようこそ！何かお手伝いしましょうか？'
+    prompt_placeholder: '手伝いましょうか？'
+    detect_language: true
+    arguments:
+      service_type: topic
+      institution: 任天堂株式会社
+      support_center_url: https://support-jp.nintendo.com/app/home
+      source_language: japanese
+      default_language: japanese
+
+gradio:
+#  path: /gradio
+  user_password: pass
+#  default_source: recursive_qa_en
+#  default_concurrency_limit: 4
+
+slack:
+#  token: required
+  default_source: recursive

@@ -1,0 +1,18 @@
+sqlalchemy[asyncio]==2.0.35
+elasticsearch[async]==8.6.2
+alembic==1.10.4
+
+# Recursive
+recursiveai-ippan-logging==0.2.0
+recursiveai-flow-framework==0.8.0
+
+# GCP
+cloud-sql-python-connector[asyncpg]==1.12.1
+google-cloud-secret-manager==2.16.4
+firebase-admin==6.5.0
+recursiveai-ippan-gcp-pub-sub==0.1.0
+recursiveai-ippan-gcp-storage==0.2.0
+
+# AWS
+boto3==1.28.43
+boto3-stubs[essential]==1.28.43

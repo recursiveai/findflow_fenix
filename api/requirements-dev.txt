@@ -1,0 +1,15 @@
+pytest==8.3.3
+pytest-cov==6.0.0
+pytest-asyncio==0.24.0
+mock==5.1.0
+
+pylint==3.3.1
+bandit==1.7.10
+
+black==24.10.0
+isort==5.13.2
+
+pyright==1.1.388
+
+pre-commit==4.0.1
+toml==0.10.2
