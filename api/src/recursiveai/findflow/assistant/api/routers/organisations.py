@@ -40,7 +40,7 @@ async def get_organisations(
     organisations_service: Annotated[
         OrganisationsService, Depends(organisations_service)
     ],
-    name: Annotated[str, Query()] = None,
+    name: Annotated[str | None, Query()] = None,
     page: Annotated[int, Query()] = 0,
     page_size: Annotated[int, Query()] = 20,
 ) -> PaginatedResponse[Organisation]:
@@ -49,7 +49,9 @@ async def get_organisations(
         page,
         page_size,
     )
-    total = await organisations_service.get_organisation_count()
+    total = await organisations_service.get_organisation_count(
+        name,
+    )
     return PaginatedResponse[Organisation](
         data=data,
         page=page,

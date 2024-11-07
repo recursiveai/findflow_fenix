@@ -76,7 +76,9 @@ async def create_async_engine_provider(db_config: DatabaseConfig) -> AsyncEngine
 def create_async_session_provider(
     async_engine: AsyncEngine,
 ) -> async_sessionmaker[AsyncSession]:
-    return async_sessionmaker(autocommit=False, autoflush=False, bind=async_engine)
+    return async_sessionmaker(
+        autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine
+    )
 
 
 async def async_create_all(async_engine: AsyncEngine, base: DeclarativeBase) -> None:

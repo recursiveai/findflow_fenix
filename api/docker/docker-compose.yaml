@@ -1,4 +1,4 @@
-name: "findflow-dependencies"
+name: "findflow-assistant-dependencies"
 services:
   db:
     image: postgres:15.2
@@ -42,4 +42,4 @@ services:
 
 networks:
   flow-network:
-    name: flow
+    name: findflow-assistant

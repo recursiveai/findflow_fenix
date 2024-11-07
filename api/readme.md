@@ -49,7 +49,13 @@ FindFlow Assistant API depends on `Postgres` and `Elasticsearch`.
 Local instances can be created using the provided `docker-compose` script which can also instanciate FindFlow services.
 
 ```
-docker-compose -f docker/docker-compose.yaml up
+podman compose -f docker/docker-compose.yaml up
+```
+
+Populate database
+
+```
+python -m alembic upgrade head
 ```
 
 ###  Services
@@ -59,11 +65,11 @@ Run the services directly from the commandline.
 #### FindFlow Assistant API
 
 ```bash
-FF__CONFIG_FILE_PATH=config/local/app_config.yaml \
+META__CONFIG_FILE_PATH=config/local/api_config.yaml \
 python -u -m uvicorn \
 recursiveai.findflow.assistant.api.app:run_app \
 --factory --proxy-headers \
---host 0.0.0.0 --port 8001
+--host localhost --port 8001
 ```
 
 ## Docker Images

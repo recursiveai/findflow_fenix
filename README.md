@@ -1,2 +1,2 @@
 # findflow_fenix
-FindFlow Assistant 2.0
+FindFlow Assistant 3.0

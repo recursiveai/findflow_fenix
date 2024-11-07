@@ -1,6 +1,0 @@
-database:
-  env: local
-  connection: "postgresql+asyncpg://postgres:example@localhost/postgres"
-
-auth:
-  env: dummy

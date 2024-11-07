@@ -2,9 +2,9 @@
 
 
 from recursiveai.findflow.assistant.common.auths import AuthConfig
-from recursiveai.findflow.assistant.common.database import DatabaseConfig, DatabaseType
+from recursiveai.findflow.assistant.common.database import DatabaseConfig
 
-from ..common.configs.base_config import BaseAppConfig, MetaConfig
+from ..common.configs.base_config import BaseAppConfig, Env, MetaConfig
 
 
 class AppConfig(BaseAppConfig):
@@ -17,5 +17,5 @@ class AppConfig(BaseAppConfig):
     def _get_meta():
         return MetaConfig(
             config_file_path="config/local/api_config.yaml",
-            run_env=DatabaseType.LOCAL,
+            env=Env.LOCAL,
         )

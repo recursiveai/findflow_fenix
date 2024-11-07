@@ -1,0 +1,6 @@
+database:
+  type: local
+  connection: "postgres:example@localhost/postgres"
+
+auth:
+  type: dummy

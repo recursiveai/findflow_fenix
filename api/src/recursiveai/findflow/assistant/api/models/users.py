@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
 from . import AppBase
+from .organisations import Organisation
 
 
 class UserRole(str, enum.Enum):
@@ -30,7 +31,7 @@ class User(AppBase):
     )
 
     organization: Mapped[str] = mapped_column(
-        ForeignKey("organizations.name"),
+        ForeignKey(Organisation.name),
         nullable=False,
     )
 

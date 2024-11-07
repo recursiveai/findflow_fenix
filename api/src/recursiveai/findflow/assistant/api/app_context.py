@@ -1,15 +1,10 @@
 # Copyright 2024 Recursive AI
 
-import json
 import logging
-from typing import Annotated, AsyncGenerator, Iterable
+from typing import Annotated, AsyncGenerator
 
-import firebase_admin
-from elasticsearch import AsyncElasticsearch
-from fastapi import Depends, Header, HTTPException, Security, status
-from fastapi.security import OAuth2, OAuth2PasswordBearer
-from fastapi.security.api_key import APIKeyHeader
-from pydantic import BaseModel, ConfigDict
+from fastapi import Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from ..common.auths import create_auth_service
@@ -19,6 +14,7 @@ from ..common.database import (
     create_async_session_provider,
 )
 from ..common.dependencies import async_singleton, singleton
+from ..common.exceptions import AlreadyExistsError, DoesNotExistError
 from .app_config import AppConfig
 from .services.organisations import OrganisationsService
 from .services.users import UsersService
@@ -33,6 +29,23 @@ def app_config() -> AppConfig:
 
     _logger.info("AppConfig: '%s'", config.model_dump_json(indent=4))
     return config
+
+
+async def exception_handler(request: Request, exception: Exception):
+    match exception:
+        case DoesNotExistError():
+            return JSONResponse(status_code=404, content=exception.message)
+        case AlreadyExistsError():
+            return JSONResponse(
+                status_code=409,
+                content=exception.message,
+            )
+        case _:
+            _logger.error("Unexpected exception", exc_info=exception)
+            return JSONResponse(
+                status_code=500,
+                content="Unexpected exception",
+            )
 
 
 @async_singleton

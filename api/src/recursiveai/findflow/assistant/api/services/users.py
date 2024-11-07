@@ -91,21 +91,34 @@ class UsersService:
             raise DoesNotExistError(f"User '{email}' does no exist")
 
         stmt = (
-            update(User)
-            .where(User.email == email)
+            update(UserModel)
+            .where(UserModel.email == email)
             .values(**update_user.model_dump(exclude_none=True))
         )
 
         async with self._session_provider() as session:
             await session.execute(stmt)
             await session.commit()
-            await session.refresh(user)
 
-        return User.model_validate(user)
+        return await self.get_user(email)
 
-    async def get_user_count(self) -> int:
+    async def get_user_count(
+        self,
+        organization: str | None = None,
+        role: UserRole | None = None,
+        email: str | None = None,
+    ) -> int:
         stmt = select(func.count(UserModel.email.distinct()))
+
+        if organization is not None:
+            stmt = stmt.where(UserModel.organization.contains(organization))
+
+        if role is not None:
+            stmt = stmt.where(UserModel.role == role)
+
+        if email is not None:
+            stmt = stmt.where(UserModel.email.contains(email))
+
         async with self._session_provider() as session:
             result = await session.execute(stmt)
-            count = result.scalar_one()
-            return count
+            return result.scalar_one()

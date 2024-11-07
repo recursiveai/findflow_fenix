@@ -35,11 +35,11 @@ async def get_user(
 @router.get("/", description="Get users")
 async def get_users(
     users_service: Annotated[UsersService, Depends(users_service)],
-    organization: Annotated[str, Query()],
-    role: Annotated[UserRole, Query()] = None,
-    email: Annotated[str, Query()] = None,
+    organization: Annotated[str | None, Query()] = None,
+    role: Annotated[UserRole | None, Query()] = None,
+    email: Annotated[str | None, Query()] = None,
     page: Annotated[int, Query()] = 0,
-    page_size: Annotated[int, Query()] = 100,
+    page_size: Annotated[int, Query()] = 20,
 ) -> PaginatedResponse[User]:
     data = await users_service.get_users(
         organization,
@@ -48,7 +48,11 @@ async def get_users(
         page,
         page_size,
     )
-    total = await users_service.get_user_count()
+    total = await users_service.get_user_count(
+        organization,
+        role,
+        email,
+    )
     return PaginatedResponse[User](
         data=data,
         page=page,

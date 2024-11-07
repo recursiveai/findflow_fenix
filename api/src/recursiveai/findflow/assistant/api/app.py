@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 
-from .app_context import app_config
+from .app_context import app_config, exception_handler
 from .routers import health_checks, organisations, users
 
 
@@ -41,4 +41,10 @@ def create_app(lifespan_context=None) -> FastAPI:
     app.include_router(organisations.router)
     app.include_router(users.router)
     app.include_router(health_checks.router)
+
+    app.add_exception_handler(
+        Exception,
+        exception_handler,
+    )
+
     return app

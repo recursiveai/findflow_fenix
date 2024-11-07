@@ -43,7 +43,7 @@ class OrganisationsService:
             await session.commit()
             # await session.refresh(organisation)
 
-        return Organisation.model_validate(organisation)
+            return Organisation.model_validate(organisation)
 
     async def get_organisation(self, name: str) -> Organisation:
         organisation = await self._get_organisation(name)
@@ -71,9 +71,15 @@ class OrganisationsService:
             organisations = result.scalars().all()
             return map(Organisation.model_validate, organisations)
 
-    async def get_organisation_count(self) -> int:
+    async def get_organisation_count(
+        self,
+        name: str | None = None,
+    ) -> int:
         stmt = select(func.count(OrganisationModel.name.distinct()))
+
+        if name is not None:
+            stmt = stmt.where(OrganisationModel.name.contains(name))
+
         async with self._session_provider() as session:
             result = await session.execute(stmt)
-            count = result.scalar_one()
-            return count
+            return result.scalar_one()

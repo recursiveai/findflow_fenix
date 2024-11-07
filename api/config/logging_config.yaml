@@ -14,15 +14,6 @@ root:
   propagate: yes
 loggers:
   recursiveai.findflow:
-    level: INFO
-    propagate: yes
-  __main__:
-    level: INFO
-    propagate: yes
-  recursiveai.findflow.customer_service:
-    level: INFO
-    propagate: yes
-  recursiveai.findflow.customer_service.routers:
-    level: INFO
+    level: DEBUG
     propagate: yes
 disable_existing_loggers: false
