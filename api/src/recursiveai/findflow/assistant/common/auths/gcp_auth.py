@@ -1,11 +1,14 @@
 # Copyright 2024 Recursive AI
 
+from typing import Literal
 import firebase_admin
 from firebase_admin import App, auth, tenant_mgt
 from pydantic import BaseModel
+from recursiveai.findflow.assistant.common.auths.base_auth import AuthType
 
 
 class GCPAuthConfig(BaseModel):
+    type: Literal[AuthType.GCP] = AuthType.GCP
     tenant_id: str | None = None
 
 

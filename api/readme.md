@@ -72,6 +72,16 @@ recursiveai.findflow.assistant.api.app:run_app \
 --host localhost --port 8001
 ```
 
+#### Using Identity Platform
+
+In order to use an Identity Platform setup from a GCP project gcloud needs to be setup.
+
+```bash
+gcloud auth application-default login
+gcloud config set project <project-id|dev-findflow>
+gcloud auth application-default set-quota-project <project-id|dev-findflow>
+```
+
 ## Docker Images
 
 Building the docker images requires populating `PIP_EXTRA_CREDENTIALS` with the gcloud access token, as follows:
