@@ -6,109 +6,58 @@ from typing import Annotated, AsyncGenerator, Iterable
 
 import firebase_admin
 from elasticsearch import AsyncElasticsearch
-from fastapi import Depends, HTTPException, Security, status
+from fastapi import Depends, Header, HTTPException, Security, status
+from fastapi.security import OAuth2, OAuth2PasswordBearer
 from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel, ConfigDict
-from recursiveai.findflow.core.database import (
-    a_create_all,
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+
+from ..common.auths import create_auth_service
+from ..common.auths.base_auth import AuthService
+from ..common.database import (
     create_async_engine_provider,
     create_async_session_provider,
 )
-from recursiveai.findflow.core.elastic import IndexService, create_elastic_client
-from recursiveai.findflow.core.model.api_metrics import APIMetricsBase
-from recursiveai.findflow.core.model.audit_logs import AuditLogsBase
-from recursiveai.findflow.core.model.blocked_keywords import BlockedKeywordsBase
-from recursiveai.findflow.core.model.conversations import ConversationsBase
-from recursiveai.findflow.core.model.departments import DepartmentsBase
-from recursiveai.findflow.core.model.documents import DocumentsBase
-from recursiveai.findflow.core.model.users import UsersBase
-from recursiveai.findflow.core.service.audit_logs import AuditLogsService
-from recursiveai.findflow.core.service.blocked_keywords import BlockedKeywordsService
-from recursiveai.findflow.core.service.conversations import ConversationsService
-from recursiveai.findflow.core.service.departments import DepartmentsService
-from recursiveai.findflow.core.service.documents import DocumentsService
-from recursiveai.findflow.core.service.metrics import MetricsService
-from recursiveai.findflow.core.service.users import UsersService
-from recursiveai.findflow.support.config import AppConfig
-from recursiveai.findflow.util.cloud_auth import (
-    AWSAuthService,
-    CloudAuthService,
-    GCPAuthService,
-    get_cognito_client,
-)
-from recursiveai.findflow.util.dependencies import (
-    AsyncProvider,
-    Provider,
-    ProviderFactory,
-    async_singleton,
-    singleton,
-)
-from recursiveai.findflow.util.gcp.gcp_config import load_string_from_secrets
-from recursiveai.findflow.util.storage import (
-    AWSStorageService,
-    CloudProvider,
-    GCPStorageService,
-    StorageService,
-)
-from recursiveai.findflow.worker.service.queue_manager import (
-    PubSubQueueManager,
-    QueueManager,
-    SQSQueueManager,
-    get_sqs_client,
-)
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from ..common.dependencies import async_singleton, singleton
+from .app_config import AppConfig
+from .services.organisations import OrganisationsService
+from .services.users import UsersService
 
 _logger = logging.getLogger(__name__)
 
 
 @singleton
-def app_config_provider() -> AppConfig:
+def app_config() -> AppConfig:
     _logger.debug("Creating AppConfig")
     config = AppConfig()
-    _logger.info("Configuration: %s", config.model_dump())
+
+    _logger.info("AppConfig: '%s'", config.model_dump_json(indent=4))
     return config
 
 
-@singleton
-def elastic_client_provider(
-    config: Annotated[AppConfig, Depends(app_config_provider)],
-) -> AsyncElasticsearch:
-    _logger.debug("Creating Elastic Client")
-    return create_elastic_client(config.elastic)
-
-
-@singleton
-def index_service_provider(
-    elastic_client: Annotated[AsyncElasticsearch, Depends(elastic_client_provider)],
-    config: Annotated[AppConfig, Depends(app_config_provider)],
-) -> IndexService:
-    _logger.debug("Creating Index Service")
-    return IndexService(elastic_client, config=config.elastic)
-
-
 @async_singleton
-async def create_async_engine(
-    config: Annotated[AppConfig, Depends(app_config_provider)],
+async def async_engine(
+    config: Annotated[AppConfig, Depends(app_config)],
 ) -> AsyncEngine:
     _logger.debug("Creating Async Engine")
     return await create_async_engine_provider(config.database)
 
 
 @singleton
-def create_async_session_maker(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
+def async_session_provider(
+    engine: Annotated[AsyncEngine, Depends(async_engine)],
 ) -> async_sessionmaker[AsyncSession]:
-    _logger.debug("Creating Async Session Maker")
+    _logger.debug("Creating Async Session Provider")
     return create_async_session_provider(engine)
 
 
-async def async_session_provider(
-    maker: Annotated[
+async def async_session(
+    session_provider: Annotated[
         async_sessionmaker[AsyncSession],
-        Depends(create_async_session_maker),
+        Depends(async_session_provider),
     ],
 ) -> AsyncGenerator[AsyncSession, None]:
-    session = maker()
+    session = session_provider()
     _logger.debug("Creating Async Session ID:[%s]", id(session))
     try:
         yield session
@@ -117,167 +66,70 @@ async def async_session_provider(
         await session.close()
 
 
-async def audit_logs_service(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession], Depends(create_async_session_maker)
-    ],
-) -> AuditLogsService:
-    _logger.debug("Creating Audit Logs Service")
-    await a_create_all(engine, AuditLogsBase)
-    return AuditLogsService(session_maker=session_maker)
-
-
-async def blocked_keywords_service(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession], Depends(create_async_session_maker)
-    ],
-) -> BlockedKeywordsService:
-    _logger.debug("Creating Blocked Keywords Service")
-    await a_create_all(engine, BlockedKeywordsBase)
-    return BlockedKeywordsService(session_maker=session_maker)
-
-
-async def conversations_service(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession], Depends(create_async_session_maker)
-    ],
-) -> ConversationsService:
-    _logger.debug("Creating Conversations Service")
-    await a_create_all(engine, ConversationsBase)
-    return ConversationsService(session_maker=session_maker)
+@singleton
+def auth_service(app_config: Annotated[AppConfig, Depends(app_config)]) -> AuthService:
+    _logger.debug("Creating Auth Service")
+    return create_auth_service(app_config.auth)
 
 
 @singleton
-def storage_service_provider(
-    config: Annotated[AppConfig, Depends(app_config_provider)]
-) -> StorageService:
-    _logger.debug("Creating Storage Service")
-    match config.storage.cloud_provider:
-        case CloudProvider.AWS:
-            return AWSStorageService()
-
-        case CloudProvider.GCP:
-            if config.storage.gcp_config.get_credentials_secret_name is None:
-                return GCPStorageService.from_default()
-
-            service_account_info_str = load_string_from_secrets(
-                config.storage.gcp_config.get_credentials_secret_name
-            )
-            service_account_info = json.loads(service_account_info_str)
-            return GCPStorageService.from_service_account_info(service_account_info)
-        case _:
-            raise ValueError(f"Unknown cloud provider: {config.storage.cloud_provider}")
-
-
-@singleton
-def queue_manager_provider(
-    config: Annotated[AppConfig, Depends(app_config_provider)]
-) -> QueueManager:
-    _logger.debug("Creating Queue Manager")
-    match config.storage.cloud_provider:
-        case CloudProvider.AWS:
-            return SQSQueueManager(config=config.publisher, sqs_client=get_sqs_client())
-        case CloudProvider.GCP:
-            return PubSubQueueManager(config=config.publisher)
-
-
-@singleton
-def queue_manager_webcrawler(
-    config: Annotated[AppConfig, Depends(app_config_provider)]
-) -> QueueManager:
-    _logger.debug("Creating Queue Manager for Webcrawler")
-    match config.storage.cloud_provider:
-        case CloudProvider.AWS:
-            return SQSQueueManager(
-                config=config.publisher_webcrawler, sqs_client=get_sqs_client()
-            )
-        case CloudProvider.GCP:
-            return PubSubQueueManager(config=config.publisher_webcrawler)
-
-
-async def metrics_service_provider(
-    config: Annotated[AppConfig, Depends(app_config_provider)],
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession], Depends(create_async_session_maker)
+def organisations_service(
+    session_provider: Annotated[
+        async_sessionmaker[AsyncSession], Depends(async_session_provider)
     ],
-) -> MetricsService:
-    _logger.debug("Creating Metrics Service")
-    await a_create_all(engine, APIMetricsBase)
-    return MetricsService(
-        config=config.quotas,
-        session_maker=session_maker,
-    )
-
-
-api_key_header = APIKeyHeader(name="findflow-token", auto_error=True)
-
-
-async def validate_api_key_header(
-    config: Annotated[AppConfig, Depends(app_config_provider)],
-    api_key: str = Security(api_key_header),
-) -> str:
-    if api_key not in config.get_api_keys:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    return api_key
+) -> OrganisationsService:
+    _logger.debug("Creating Organisations Service")
+    return OrganisationsService(session_provider)
 
 
 @singleton
-def cloud_auth_service(
-    config: Annotated[AppConfig, Depends(app_config_provider)]
-) -> CloudAuthService:
-    _logger.debug("Creating Cloud Auth Service")
-    match config.storage.cloud_provider:
-        case CloudProvider.AWS:
-            return AWSAuthService(
-                user_pool_id=config.auth.user_pool_id,
-                cognito_client=get_cognito_client(),
-            )
-        case CloudProvider.GCP:
-            try:
-                _fire_app = firebase_admin.get_app()
-            except ValueError:
-                _fire_app = firebase_admin.initialize_app()
-            return GCPAuthService(firebase_admin_app=_fire_app)
-        case _:
-            raise ValueError(f"Unknown cloud provider: {config.storage.cloud_provider}")
-
-
-async def users_service(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession],
-        Depends(create_async_session_maker),
+def users_service(
+    session_provider: Annotated[
+        async_sessionmaker[AsyncSession], Depends(async_session_provider)
     ],
+    auth_service: Annotated[AuthService, Depends(auth_service)],
 ) -> UsersService:
     _logger.debug("Creating Users Service")
-    await a_create_all(engine, UsersBase)
-    return UsersService(session_maker=session_maker)
+    return UsersService(session_provider, auth_service)
 
 
-async def documents_service_provider(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession], Depends(create_async_session_maker)
-    ],
-) -> DocumentsService:
-    _logger.debug("Creating Documents Service")
-    await a_create_all(engine, DocumentsBase)
-    return DocumentsService(session_maker=session_maker)
+# api_key_header = APIKeyHeader(name="api-key", auto_error=True)
+# user_id_header = Header(name="user-id", auto_error=True)
+
+# async def validate_api_key_header(
+#     api_key: Annotated[str, Depends(api_key_header)],
+#     user_id: Annotated[str, Depends(user_id_header)],
+# ) -> str:
+#     if api_key not in config.get_api_keys:
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+#     return api_key
 
 
-async def departments_service(
-    engine: Annotated[AsyncEngine, Depends(create_async_engine)],
-    session_maker: Annotated[
-        async_sessionmaker[AsyncSession], Depends(create_async_session_maker)
-    ],
-    documents_service: Annotated[DocumentsService, Depends(documents_service_provider)],
-) -> DepartmentsService:
-    _logger.debug("Creating Departments Service")
-    await a_create_all(engine, DepartmentsBase)
-    return DepartmentsService(
-        session_maker=session_maker, documents_service=documents_service
-    )
+# user_token_header = OAuth2(auto_error=False)
+
+# async def validate_user_token_header(
+#     user_token: Annotated[str, Depends(user_token_header)],
+
+# ) -> str:
+#     if api_key not in config.get_api_keys:
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+#     return api_key
+
+# async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         username: str = payload.get("sub")
+#         if username is None:
+#             raise credentials_exception
+#         token_data = TokenData(username=username)
+#     except InvalidTokenError:
+#         raise credentials_exception
+#     user = get_user(fake_users_db, username=token_data.username)
+#     if user is None:
+#         raise credentials_exception
+#     return user

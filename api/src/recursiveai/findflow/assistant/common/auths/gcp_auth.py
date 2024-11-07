@@ -1,50 +1,53 @@
 # Copyright 2024 Recursive AI
 
-import logging
-
-from firebase_admin import auth as firebase_auth
-from firebase_admin import exceptions as firebase_exceptions
+import firebase_admin
+from firebase_admin import App, auth, tenant_mgt
 from pydantic import BaseModel
 
-from recursiveai.findflow.core.exceptions import DoesNotExistError
-from recursiveai.findflow.core.schemas import CreateUser
 
-_logger = logging.getLogger(__name__)
-
-
-class CloudAuthConfig(BaseModel):
-    user_pool_id: str | None = None
+class GCPAuthConfig(BaseModel):
+    tenant_id: str | None = None
 
 
+def _get_or_create_app() -> App:
+    try:
+        return firebase_admin.get_app()
+    except ValueError:
+        return firebase_admin.initialize_app()
+
+
+def _get_auth_client(tenant_id: str | None) -> auth.Client:
+    app = _get_or_create_app()
+    if tenant_id:
+        return tenant_mgt.auth_for_tenant(tenant_id, app)
+    return auth._get_client(app)
+
+
+# TODO: Add calls to threadpool to avoid blocking async loop
 class GCPAuthService:
-    def __init__(self, firebase_admin_app) -> None:
-        self.firebase_admin = firebase_admin_app
+    def __init__(self, config: GCPAuthConfig) -> None:
+        self._auth_client = _get_auth_client(config.tenant_id)
 
-    def _get_user_by_email(self, email: str) -> firebase_auth.UserRecord:
-        return self.firebase_admin.get_user_by_email(email)
-    
-    def validate_user_token(self, jwt: str) -> None:
-        firebase_auth.verify_id_token()
+    def _get_user_by_email(self, email: str) -> auth.UserRecord:
+        return self._auth_client.get_user_by_email(email)
 
-    def delete_user(self, email: str) -> None:
-        try:
-            gcp_user = self._get_user_by_email(email)
-        except firebase_exceptions.NotFoundError as error:
-            _logger.debug(error)
-            raise DoesNotExistError(f"User {email} not found in cloud") from error
-        firebase_auth.delete_user(gcp_user.uid)
-
-    def create_user(self, new_user: CreateUser) -> firebase_auth.UserRecord:
-        if new_user.password is None:
-            return firebase_auth.create_user(email=new_user.email)
-        return firebase_auth.create_user(
-            email=new_user.email, password=new_user.password
+    async def validate_user_token(self, user_token: str) -> None:
+        self._auth_client.verify_id_token(
+            id_token=user_token,
+            check_revoked=True,
         )
 
-    def update_password(self, email: str, password: str) -> None:
-        try:
-            gcp_user = self._get_user_by_email(email)
-        except firebase_exceptions.NotFoundError as error:
-            _logger.debug(error)
-            raise DoesNotExistError(f"User {email} not found in cloud") from error
-        firebase_auth.update_user(gcp_user.uid, password=password)
+    async def create_user(self, email: str, password: str | None = None) -> str:
+        new_user = self._auth_client.create_user(
+            email=email,
+            password=password,
+        )
+        return new_user.uid
+
+    async def update_password(self, email: str, password: str) -> None:
+        gcp_user = self._get_user_by_email(email)
+        self._auth_client.update_user(gcp_user.uid, password=password)
+
+    async def delete_user(self, email: str) -> None:
+        gcp_user = self._get_user_by_email(email)
+        self._auth_client.delete_user(gcp_user.uid)

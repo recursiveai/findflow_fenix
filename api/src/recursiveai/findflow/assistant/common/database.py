@@ -16,18 +16,18 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 
-class Env(str, Enum):
+class DatabaseType(str, Enum):
     LOCAL = "local"
     GCP = "gcp"
 
 
 class LocalConfig(BaseModel):
-    env: Literal[Env.LOCAL] = Env.LOCAL
+    type: Literal[DatabaseType.LOCAL] = DatabaseType.LOCAL
     connection: SecretStr
 
 
 class GCPConfig(BaseModel):
-    env: Literal[Env.GCP] = Env.GCP
+    type: Literal[DatabaseType.GCP] = DatabaseType.GCP
 
     connection: SecretStr
     private_ip: bool = True
@@ -37,18 +37,15 @@ class GCPConfig(BaseModel):
     password: SecretStr
 
 
-class DatabaseConfig(BaseModel):
-    config: LocalConfig | GCPConfig
-
-    create: bool = False
+DatabaseConfig = LocalConfig | GCPConfig
 
 
 _DRIVER = "asyncpg"
 _PROTOCOL = f"postgresql+{_DRIVER}://"
 
 
-async def create_async_engine_provider(config: DatabaseConfig) -> AsyncEngine:
-    match db_config := config.config:
+async def create_async_engine_provider(db_config: DatabaseConfig) -> AsyncEngine:
+    match db_config:
         case LocalConfig():
             return create_async_engine(
                 _PROTOCOL + db_config.connection.get_secret_value(),

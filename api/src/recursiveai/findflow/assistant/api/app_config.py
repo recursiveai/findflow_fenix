@@ -1,27 +1,21 @@
 # Copyright 2024 Recursive AI
 
-from functools import cached_property
 
-from api.src.recursiveai.findflow.assistant.common.configs.base_config import (
-    BaseAppConfig,
-)
+from recursiveai.findflow.assistant.common.auths import AuthConfig
+from recursiveai.findflow.assistant.common.database import DatabaseConfig, DatabaseType
+
+from ..common.configs.base_config import BaseAppConfig, MetaConfig
 
 
 class AppConfig(BaseAppConfig):
 
     database: DatabaseConfig
 
-    auth: CloudAuthConfig = Field(default_factory=CloudAuthConfig)
-
-    api_keys: list[SecretStr]
-
-    @cached_property
-    def get_api_keys(self) -> list[str]:
-        return [key.get_secret_value() for key in self.api_keys]
+    auth: AuthConfig
 
     @staticmethod
     def _get_meta():
         return MetaConfig(
-            config_file_path="config/local/support_config.yaml",
-            run_env=RunEnv.LOCAL,
+            config_file_path="config/local/api_config.yaml",
+            run_env=DatabaseType.LOCAL,
         )

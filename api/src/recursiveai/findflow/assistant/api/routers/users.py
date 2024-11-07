@@ -1,107 +1,66 @@
 # Copyright 2024 Recursive AI
 
-import logging
-from enum import Enum
-from typing import Annotated, Generic, Iterable, TypeVar
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
-from firebase_admin import exceptions as firebase_exceptions
-from pydantic import BaseModel, EmailStr, Field
+from fastapi import APIRouter, Depends, Path, Query
 
-_logger = logging.getLogger(__name__)
-
-
-class StatusEnum(str, Enum):
-    SUCCESS = "success"
-    ERROR = "error"
-    FAIL = "fail"
-
-
-class UpdatePasswordRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UpdatePasswordResponse(BaseModel):
-    status: StatusEnum
-    data: dict[str, str] = Field(default_factory=dict)
-
-
-class RequesterUser(BaseModel):
-    email: EmailStr
-    role: RoleStrEnum
-
-
-class User(BaseModel):
-    email: EmailStr
-    role: str
-
-T = TypeVar("T")
-
-class Paginated(BaseModel, Generic[T]):
-    result: Iterable[User]
-    page_number: int
-    page_size: int
-    total_size: int
-
-class Users(Paginated[User]):
-    pass
-
+from ..app_context import users_service
+from ..models.users import UserRole
+from ..schemas.users import CreateUser, UpdateUser, User
+from ..services.users import UsersService
+from . import PaginatedResponse
 
 router = APIRouter(
     prefix="/v1/users",
     tags=["Users"],
-    dependencies=[
-        Depends(app_context.validate_api_key_header),
-    ],
 )
 
 
 @router.post("/", description="Create new user")
 async def create_user(
-    new_user: CreateUser,
+    create_user: CreateUser,
+    users_service: Annotated[UsersService, Depends(users_service)],
 ) -> User:
-    return User(email=user_email, role="user")
+    return await users_service.create_user(create_user)
 
 
-@router.get("/{user_email}", description="Get user by email")
+@router.get("/{email}", description="Get user")
 async def get_user(
-    user_email: Annotated[str, Path()],
+    email: Annotated[str, Path()],
+    users_service: Annotated[UsersService, Depends(users_service)],
 ) -> User:
-    return User(email=user_email, role="user")
+    return await users_service.get_user(email)
 
 
-@router.get("/", description="Get all users")
+@router.get("/", description="Get users")
 async def get_users(
+    users_service: Annotated[UsersService, Depends(users_service)],
     organization: Annotated[str, Query()],
+    role: Annotated[UserRole, Query()] = None,
     email: Annotated[str, Query()] = None,
-    skip: Annotated[int, Query()] = 0,
-    limit: Annotated[int, Query()] = 100,
-) -> Users:
-    return Users(
-
+    page: Annotated[int, Query()] = 0,
+    page_size: Annotated[int, Query()] = 100,
+) -> PaginatedResponse[User]:
+    data = await users_service.get_users(
+        organization,
+        role,
+        email,
+        page,
+        page_size,
+    )
+    total = await users_service.get_user_count()
+    return PaginatedResponse[User](
+        data=data,
+        page=page,
+        page_size=page_size,
+        total=total,
     )
 
-@router.put("/user")
+
+@router.put("/user/{email}", description="Update user")
 async def update_user(
-    user_to_update: UpdateUser,
-) -> UpdateUser:
-    try:
-        await users_services.update_user(user_to_update=user_to_update)
-    except Exception as exc:
-        _logger.error("Error updating user %s: %s", user_to_update.email, exc)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User was not updated"
-        ) from exc
-    _logger.warning(
-        "Updated information for user [%s]",
-        user_to_update.email,
-    )
-    return user_to_update
-
-
-@router.delete("/{user_email}", description="Delete user by email")
-async def delete_user(
-    user_email: Annotated[str, Path()]
-) -> None:
-    pass
+    email: Annotated[str, Path()],
+    update_user: UpdateUser,
+    users_service: Annotated[UsersService, Depends(users_service)],
+) -> User:
+    return await users_service.update_user(email, update_user)

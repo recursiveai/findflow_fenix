@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/v1/health",
-    tags=["Health Check"],
+    tags=["Health Checks"],
     dependencies=[],
 )
 
