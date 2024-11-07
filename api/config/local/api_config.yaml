@@ -1,0 +1,10 @@
+database:
+  type: local
+  connection: "postgres:example@localhost/postgres"
+
+auth:
+  type: dummy
+
+  # Requires gcloud properly configured
+  # type: gcp
+  # tenant_id: local-miguel-92yv7

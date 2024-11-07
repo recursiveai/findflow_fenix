@@ -1,0 +1,39 @@
+## Working with Alembic migrations
+
+### Creating Migrations
+
+```bash
+# After making change(s) to a DB model
+alembic revision --autogenerate -m 'add_column_name_to_table'
+```
+
+If a new model was created, the model needs to be imported into `./alembic/env.py`
+
+```python
+import recursiveai.findflow.assistant.api.models.organisations
+```
+
+Then run the `revision --autogenerate` command
+
+### Run migrations
+
+```bash
+# check for revisions, compare the output of
+alembic history
+
+# with the output of
+alembic current
+
+# to run migrations
+alembic upgrade head
+```
+
+### Undoing a migration
+
+```bash
+# go back 1 migration
+alembic downgrade -1
+
+# downgrade to initial migration file
+alembic downgrade base
+```
