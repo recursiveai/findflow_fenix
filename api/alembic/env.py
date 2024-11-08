@@ -10,6 +10,9 @@ from alembic import context
 from recursiveai.findflow.assistant.api.models import AppBase
 import recursiveai.findflow.assistant.api.models.organisations
 import recursiveai.findflow.assistant.api.models.users
+import recursiveai.findflow.assistant.api.models.user_groups
+import recursiveai.findflow.assistant.api.models.blocked_keywords
+import recursiveai.findflow.assistant.api.models.conversations
 
 
 # this is the Alembic Config object, which provides

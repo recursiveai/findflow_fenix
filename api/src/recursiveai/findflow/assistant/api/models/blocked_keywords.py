@@ -1,42 +1,32 @@
 # Copyright 2024 Recursive AI
 
-import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, func
+from sqlalchemy import BigInteger, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql import func
 
 from . import AppBase
 from .organisations import Organisation
 
 
-class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
+class BlockedKeyword(AppBase):
+    __tablename__ = "blocked_keywords"
 
-
-class UserLanguage(str, enum.Enum):
-    ENGLISH = "en"
-    JAPANESE = "ja"
-
-
-class User(AppBase):
-    __tablename__ = "users"
-
-    email: Mapped[str] = mapped_column(
-        String,
+    id: Mapped[int] = mapped_column(
+        BigInteger,
         primary_key=True,
+        index=True,
     )
 
     organization_id: Mapped[str] = mapped_column(
         ForeignKey(Organisation.id),
         nullable=False,
-        index=True,
     )
 
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
-    language: Mapped[UserLanguage] = mapped_column(Enum(UserLanguage), nullable=False)
+    keyword: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

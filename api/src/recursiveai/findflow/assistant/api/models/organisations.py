@@ -12,10 +12,9 @@ from . import AppBase
 class Organisation(AppBase):
     __tablename__ = "organisations"
 
-    name: Mapped[str] = mapped_column(
+    id: Mapped[str] = mapped_column(
         String,
         primary_key=True,
-        index=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

@@ -52,7 +52,7 @@ Local instances can be created using the provided `docker-compose` script which 
 podman compose -f docker/docker-compose.yaml up
 ```
 
-Populate database
+Populate and update database to latest schema.
 
 ```
 python -m alembic upgrade head

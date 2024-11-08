@@ -9,7 +9,7 @@ from ..models.users import UserLanguage, UserRole
 
 class CreateUser(BaseModel):
     email: EmailStr
-    organization: str
+    organization_id: str
 
     role: UserRole
     language: UserLanguage

@@ -3,7 +3,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -11,32 +11,18 @@ from . import AppBase
 from .organisations import Organisation
 
 
-class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
+class UserGroup(AppBase):
+    __tablename__ = "user_groups"
 
-
-class UserLanguage(str, enum.Enum):
-    ENGLISH = "en"
-    JAPANESE = "ja"
-
-
-class User(AppBase):
-    __tablename__ = "users"
-
-    email: Mapped[str] = mapped_column(
+    id: Mapped[str] = mapped_column(
         String,
         primary_key=True,
     )
 
     organization_id: Mapped[str] = mapped_column(
         ForeignKey(Organisation.id),
-        nullable=False,
-        index=True,
+        primary_key=True,
     )
-
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
-    language: Mapped[UserLanguage] = mapped_column(Enum(UserLanguage), nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

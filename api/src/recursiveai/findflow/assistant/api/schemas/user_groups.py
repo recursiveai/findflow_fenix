@@ -5,11 +5,12 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class CreateOrganisation(BaseModel):
+class CreateUserGroup(BaseModel):
     id: str
+    organization_id: str
 
 
-class Organisation(CreateOrganisation):
+class UserGroup(CreateUserGroup):
     created_at: datetime
     updated_at: datetime
 

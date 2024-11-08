@@ -1,6 +1,8 @@
 # Copyright 2024 Recursive AI
 
 
+from pydantic import SecretStr
+
 from recursiveai.findflow.assistant.common.auths import AuthConfig
 from recursiveai.findflow.assistant.common.database import DatabaseConfig
 
@@ -12,6 +14,8 @@ class AppConfig(BaseAppConfig):
     database: DatabaseConfig
 
     auth: AuthConfig
+
+    api_key: SecretStr
 
     @staticmethod
     def _get_meta():

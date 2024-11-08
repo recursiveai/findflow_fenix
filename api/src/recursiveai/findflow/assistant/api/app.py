@@ -8,7 +8,14 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 
 from .app_context import app_config, exception_handler
-from .routers import health_checks, organisations, users
+from .routers import (
+    blocked_keywords,
+    conversations,
+    health_checks,
+    organisations,
+    user_groups,
+    users,
+)
 
 
 @asynccontextmanager
@@ -30,17 +37,24 @@ def create_app(lifespan_context=None) -> FastAPI:
         lifespan=lifespan_context,
     )
 
-    # app.add_middleware(GZipMiddleware)
-    # app.add_middleware(
-    #     CORSMiddleware,
-    #     allow_origins=["localhost"],
-    #     allow_methods=["POST"],
-    #     allow_headers=["*"],
-    # )
+    # TODO: Should be disabled for stream endpoints or client side tweak
+    app.add_middleware(GZipMiddleware)
+
+    # TODO: Load from configuration
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     app.include_router(organisations.router)
     app.include_router(users.router)
+    app.include_router(user_groups.router)
     app.include_router(health_checks.router)
+
+    app.include_router(conversations.router)
+    app.include_router(blocked_keywords.router)
 
     app.add_exception_handler(
         Exception,

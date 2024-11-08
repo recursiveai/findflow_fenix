@@ -4,7 +4,7 @@
 
 ```bash
 # After making change(s) to a DB model
-alembic revision --autogenerate -m 'add_column_name_to_table'
+python -m alembic revision --autogenerate -m 'add_column_name_to_table'
 ```
 
 If a new model was created, the model needs to be imported into `./alembic/env.py`
@@ -19,21 +19,21 @@ Then run the `revision --autogenerate` command
 
 ```bash
 # check for revisions, compare the output of
-alembic history
+python -m alembic history
 
 # with the output of
-alembic current
+python -m alembic current
 
 # to run migrations
-alembic upgrade head
+python -m alembic upgrade head
 ```
 
 ### Undoing a migration
 
 ```bash
 # go back 1 migration
-alembic downgrade -1
+python -m alembic downgrade -1
 
 # downgrade to initial migration file
-alembic downgrade base
+python -m alembic downgrade base
 ```

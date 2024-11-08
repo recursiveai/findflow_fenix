@@ -21,23 +21,18 @@ class OrganisationsService:
     ) -> None:
         self._session_provider = session_provider
 
-    async def _get_organisation(self, name: str) -> OrganisationModel | None:
-        stmt = select(OrganisationModel).where(OrganisationModel.name == name)
+    async def _get_organisation(self, id: str) -> OrganisationModel | None:
+        stmt = select(OrganisationModel).where(OrganisationModel.id == id)
         async with self._session_provider() as session:
             result = await session.execute(stmt)
-            result = result.scalar()
-            return result
+            return result.scalar()
 
-    async def create_organisation(
-        self, create_organisation: CreateOrganisation
-    ) -> Organisation:
-        organisation = await self._get_organisation(create_organisation.name)
+    async def create_organisation(self, create_org: CreateOrganisation) -> Organisation:
+        organisation = await self._get_organisation(create_org.id)
         if organisation is not None:
-            raise AlreadyExistsError(
-                f"Organisation '{create_organisation.name}' already exists"
-            )
+            raise AlreadyExistsError(f"Organisation '{create_org.id}' already exists")
 
-        organisation = OrganisationModel(**create_organisation.model_dump())
+        organisation = OrganisationModel(**create_org.model_dump())
         async with self._session_provider() as session:
             session.add(organisation)
             await session.commit()
@@ -45,40 +40,39 @@ class OrganisationsService:
 
             return Organisation.model_validate(organisation)
 
-    async def get_organisation(self, name: str) -> Organisation:
-        organisation = await self._get_organisation(name)
+    async def get_organisation(self, id: str) -> Organisation:
+        organisation = await self._get_organisation(id)
         if organisation is None:
-            raise DoesNotExistError(f"Organisation '{name}' does no exist")
+            raise DoesNotExistError(f"Organisation '{id}' does no exist")
 
         return Organisation.model_validate(organisation)
 
     async def get_organisations(
         self,
-        name: str | None = None,
+        id: str | None = None,
         page: int = 0,
         page_size: int = 20,
     ) -> Iterable[Organisation]:
         stmt = select(OrganisationModel)
 
-        if name is not None:
-            stmt = stmt.where(OrganisationModel.name.contains(name))
+        if id is not None:
+            stmt = stmt.where(OrganisationModel.id.contains(id))
 
-        stmt = stmt.order_by(OrganisationModel.name)
+        stmt = stmt.order_by(OrganisationModel.id)
         stmt = stmt.offset(page * page_size).limit(page_size)
 
         async with self._session_provider() as session:
             result = await session.execute(stmt)
-            organisations = result.scalars().all()
-            return map(Organisation.model_validate, organisations)
+            return map(Organisation.model_validate, result.scalars().all())
 
     async def get_organisation_count(
         self,
-        name: str | None = None,
+        id: str | None = None,
     ) -> int:
-        stmt = select(func.count(OrganisationModel.name.distinct()))
+        stmt = select(func.count()).select_from(OrganisationModel)
 
-        if name is not None:
-            stmt = stmt.where(OrganisationModel.name.contains(name))
+        if id is not None:
+            stmt = stmt.where(OrganisationModel.id.contains(id))
 
         async with self._session_provider() as session:
             result = await session.execute(stmt)

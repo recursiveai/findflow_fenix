@@ -17,39 +17,33 @@ router = APIRouter(
 
 @router.post("/", description="Create new organisation")
 async def create_organisation(
-    create_organisation: CreateOrganisation,
-    organisations_service: Annotated[
-        OrganisationsService, Depends(organisations_service)
-    ],
+    create: CreateOrganisation,
+    service: Annotated[OrganisationsService, Depends(organisations_service)],
 ) -> Organisation:
-    return await organisations_service.create_organisation(create_organisation)
+    return await service.create_organisation(create)
 
 
-@router.get("/{name}", description="Get organisation")
+@router.get("/{id}", description="Get organisation")
 async def get_organisation(
-    name: Annotated[str, Path()],
-    organisations_service: Annotated[
-        OrganisationsService, Depends(organisations_service)
-    ],
+    id: Annotated[str, Path()],
+    service: Annotated[OrganisationsService, Depends(organisations_service)],
 ) -> Organisation:
-    return await organisations_service.get_organisation(name)
+    return await service.get_organisation(id)
 
 
 @router.get("/", description="Get all organisations")
 async def get_organisations(
-    organisations_service: Annotated[
-        OrganisationsService, Depends(organisations_service)
-    ],
+    service: Annotated[OrganisationsService, Depends(organisations_service)],
     name: Annotated[str | None, Query()] = None,
     page: Annotated[int, Query()] = 0,
     page_size: Annotated[int, Query()] = 20,
 ) -> PaginatedResponse[Organisation]:
-    data = await organisations_service.get_organisations(
+    data = await service.get_organisations(
         name,
         page,
         page_size,
     )
-    total = await organisations_service.get_organisation_count(
+    total = await service.get_organisation_count(
         name,
     )
     return PaginatedResponse[Organisation](

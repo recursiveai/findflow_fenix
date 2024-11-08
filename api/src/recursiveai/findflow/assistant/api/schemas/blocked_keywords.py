@@ -5,11 +5,19 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class CreateOrganisation(BaseModel):
+class CreateBlockedKeyword(BaseModel):
+    organization_id: str
+
+    keyword: str
+
+
+class UpdateBlockedKeyword(BaseModel):
+    keyword: str | None = None
+
+
+class BlockedKeyword(CreateBlockedKeyword):
     id: str
 
-
-class Organisation(CreateOrganisation):
     created_at: datetime
     updated_at: datetime
 
